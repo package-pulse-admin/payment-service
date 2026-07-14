@@ -75,6 +75,8 @@ CREATE TABLE IF NOT EXISTS payments (
         ON DELETE CASCADE
         ON UPDATE CASCADE,
 
+    CONSTRAINT uq_payment_transaction UNIQUE(transaction_id),
+
     INDEX idx_payment_transaction_id(transaction_id),
     INDEX idx_payment_order_id(order_id),
     INDEX idx_payment_customer_id(customer_id),
