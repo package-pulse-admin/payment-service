@@ -18,40 +18,31 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @Column(name = "transaction_id", nullable = false)
     private Long transactionId;
-
 
     @Column(name = "order_id", nullable = false)
     private Long orderId;
 
-
     @Column(name = "customer_id", nullable = false, length = 100)
     private String customerId;
 
-
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
-
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 3)
     private Currency currency;
 
-
     @Column(nullable = false, length = 50)
     private String provider = "PAYPAL";
-
 
     @Column(name = "paypal_payment_id")
     private String paypalPaymentId;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private TransactionStatus status;
-
 
     @Column(name = "failure_reason", length = 500)
     private String failureReason;
