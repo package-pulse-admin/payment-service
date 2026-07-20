@@ -1,18 +1,24 @@
 spring:
   application:
-    name: payment-service
+    name: order-service
   datasource:
-    url: ${DATABASE_URL_ORDER_PLATFORM}
-    username: ${DATABASE_USERNAME_ORDER_PLATFORM}
-    password: ${DATABASE_PASSWORD_ORDER_PLATFORM}
+    url: jdbc:mysql://localhost:3307/order_platform
+    username: order_user
+    password: order_password
     driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
 
 server:
-  port: 8080
+  port: 8081
 
 management:
   server:
-    port: 9090
+    port: 9081
   endpoints:
     web:
       exposure:
@@ -28,6 +34,5 @@ management:
 
 logging:
   level:
-    com.mihaela.orderplatform: INFO
-
+    com.mihaela.orderplatform: DEBUG
 
