@@ -26,9 +26,15 @@ management:
     tags:
       application: ${spring.application.name}
 
-paypal:
-  client-id: ${PAYPAL_CLIENT_ID}
-  client-secret: ${PAYPAL_SECRETS}
+payment-service:
+  payment:
+    kafka:
+      transaction-created-topic: ${KAFKA_TRANSACTION_CREATED_TOPIC}
+      group-id: ${KAFKA_PAYMENT_SERVICE_GROUP_ID}
+    paypal:
+      base-url: https://api-m.sandbox.paypal.com
+      client-id: ${PAYPAL_CLIENT_ID}
+      client-secret: ${PAYPAL_SECRETS}
 
 logging:
   level:
