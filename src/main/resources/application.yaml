@@ -26,8 +26,13 @@ management:
     tags:
       application: ${spring.application.name}
 
+paypal:
+  client-id: ${PAYPAL_CLIENT_ID}
+  client-secret: ${PAYPAL_SECRETS}
+
 logging:
   level:
     com.mihaela.orderplatform: INFO
+
 
 
