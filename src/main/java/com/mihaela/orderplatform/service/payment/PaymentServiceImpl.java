@@ -1,8 +1,12 @@
 package com.mihaela.orderplatform.service.payment;
 
-import com.mihaela.orderplatform.domain.Payment;
+import com.mihaela.orderplatform.domain.payment.Payment;
+import com.mihaela.orderplatform.domain.payment.PaymentNotificationEvent;
+import com.mihaela.orderplatform.domain.paypal.CreateOrderResponse;
 import com.mihaela.orderplatform.domain.transactions.TransactionCreatedEvent;
+import com.mihaela.orderplatform.enums.Providers;
 import com.mihaela.orderplatform.enums.TransactionStatus;
+import com.mihaela.orderplatform.mapper.TransactionPaymentMapper;
 import com.mihaela.orderplatform.repository.PaymentRepository;
 import com.mihaela.orderplatform.service.external.PaypalClient;
 import lombok.RequiredArgsConstructor;
@@ -18,33 +22,75 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PaypalClient paypalClient;
+    private final PaymentEventProducer paymentEventProducer;
+    private final TransactionPaymentMapper mapper;
 
     @Override
     public void processPayment(TransactionCreatedEvent event) {
 
-        // check duplicated
+        if (isDuplicatePayment(event)) {
+            return;
+        }
 
-        // create payment
-
-        // payWithPaypal(payment);
-
-        // publish event for notification
+        Payment payment = createPayment(event);
+        Payment processedPayment = processPaypalPayment(payment);
+        publishNotificationIfPaid(processedPayment);
     }
 
-    private void payWithPaypal (Payment payment) {
-        log.trace("Payment processing for orderId: {} and transactionId: {}" , payment.getOrderId(), payment.getTransactionId() );
-        try {
-            paypalClient.createOrder(payment.getAmount(), payment.getCurrency().name());
-            payment.setStatus(TransactionStatus.PAID);
-            paymentRepository.save(payment);
+    private boolean isDuplicatePayment(TransactionCreatedEvent event) {
 
-            log.trace("Payment successfully processed");
+        boolean exists = paymentRepository.existsByTransactionIdAndOrderIdAndCustomerId(event.transactionId(),
+                event.orderId(), event.customerId());
+
+        if (exists) {
+            log.warn("Payment already exists for transactionId={}, orderId={}, customerId={}", event.transactionId(),
+                    event.orderId(), event.customerId());
+        }
+
+        return exists;
+    }
+
+    private Payment createPayment(TransactionCreatedEvent event) {
+
+        Payment payment = mapper.fromTransactionCreatedEvent(event);
+        payment.setStatus(TransactionStatus.PAYMENT_PROCESSING);
+        Payment savedPayment = paymentRepository.save(payment);
+
+        log.info("Created payment record. paymentId={}, transactionId={}, orderId={}", savedPayment.getId(),
+                savedPayment.getTransactionId(), savedPayment.getOrderId());
+
+        return savedPayment;
+    }
+
+    private Payment processPaypalPayment(Payment payment) {
+        log.info("Processing PayPal payment. paymentId={}, transactionId={}, orderId={}", payment.getId(), payment.getTransactionId(), payment.getOrderId());
+
+        try {
+            CreateOrderResponse paypalOrderId = paypalClient.createOrder(payment.getAmount(), payment.getCurrency().name());
+
+            payment.setPaypalPaymentId(paypalOrderId.id());
+            payment.setProvider(Providers.PAYPAL);
+            payment.setStatus(TransactionStatus.PAID);
+            log.info("Payment successfully processed. paymentId={}, paypalOrderId={}", payment.getId(), paypalOrderId);
+
         } catch (Exception ex) {
+            payment.setProvider(Providers.PAYPAL);
             payment.setStatus(TransactionStatus.PAYMENT_FAILED);
             payment.setFailureReason(ex.getMessage());
-            paymentRepository.save(payment);
-
-            log.error("Payment processing failed", ex);
+            log.error("Payment processing failed. paymentId={}, transactionId={}", payment.getId(), payment.getTransactionId(), ex);
         }
+
+        return paymentRepository.save(payment);
+    }
+
+    private void publishNotificationIfPaid(Payment payment) {
+
+        if (payment.getStatus() != TransactionStatus.PAID) {
+            return;
+        }
+
+        PaymentNotificationEvent notificationEvent = mapper.fromPayment(payment);
+        paymentEventProducer.publishPaymentNotification(notificationEvent);
+        log.info("Payment notification published. paymentId={}, transactionId={}", payment.getId(), payment.getTransactionId());
     }
 }

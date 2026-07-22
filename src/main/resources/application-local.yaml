@@ -32,6 +32,17 @@ management:
     tags:
       application: ${spring.application.name}
 
+payment-service:
+  payment:
+    kafka:
+      transaction-created-topic:
+      group-id: payment-service
+      payment-notification-topic: payment-notification_topic
+    paypal:
+      base-url: https://api-m.sandbox.paypal.com
+      client-id: xxx
+      client-secret: xxx
+
 logging:
   level:
     com.mihaela.orderplatform: DEBUG

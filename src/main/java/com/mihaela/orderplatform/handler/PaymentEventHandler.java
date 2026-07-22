@@ -1,6 +1,7 @@
-package com.mihaela.orderplatform.service.payment;
+package com.mihaela.orderplatform.handler;
 
 import com.mihaela.orderplatform.domain.transactions.TransactionCreatedEvent;
+import com.mihaela.orderplatform.service.payment.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

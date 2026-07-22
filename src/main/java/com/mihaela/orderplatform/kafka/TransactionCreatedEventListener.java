@@ -1,7 +1,7 @@
 package com.mihaela.orderplatform.kafka;
 
 import com.mihaela.orderplatform.domain.transactions.TransactionCreatedEvent;
-import com.mihaela.orderplatform.service.payment.PaymentEventHandler;
+import com.mihaela.orderplatform.handler.PaymentEventHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;

@@ -31,6 +31,7 @@ payment-service:
     kafka:
       transaction-created-topic: ${KAFKA_TRANSACTION_CREATED_TOPIC}
       group-id: ${KAFKA_PAYMENT_SERVICE_GROUP_ID}
+      payment-notification-topic: ${KAFKA_PAYMENT_NOTIFICATION_TOPIC}
     paypal:
       base-url: https://api-m.sandbox.paypal.com
       client-id: ${PAYPAL_CLIENT_ID}
