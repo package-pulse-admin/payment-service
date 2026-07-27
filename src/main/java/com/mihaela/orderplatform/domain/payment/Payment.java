@@ -1,6 +1,7 @@
-package com.mihaela.orderplatform.domain;
+package com.mihaela.orderplatform.domain.payment;
 
 import com.mihaela.orderplatform.enums.Currency;
+import com.mihaela.orderplatform.enums.Providers;
 import com.mihaela.orderplatform.enums.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -34,8 +35,9 @@ public class Payment {
     @Column(nullable = false, length = 3)
     private Currency currency;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String provider = "PAYPAL";
+    private Providers provider;
 
     @Column(name = "paypal_payment_id")
     private String paypalPaymentId;
